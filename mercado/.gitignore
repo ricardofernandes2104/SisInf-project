@@ -1,0 +1,16 @@
+# Ficheiros compilados
+target/
+bin/
+*.class
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Ficheiros temporários do SO
+.DS_Store
+Thumbs.db
