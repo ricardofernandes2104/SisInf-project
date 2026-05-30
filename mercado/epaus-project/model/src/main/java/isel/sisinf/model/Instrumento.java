@@ -1,6 +1,6 @@
 package isel.sisinf.model;
 
-import java.util.List;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "instrumento")
@@ -13,43 +13,23 @@ public class Instrumento {
     @Column(name = "descricao", nullable = false, length = 256)
     private String descricao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mercado", nullable = false)
-    private Mercado mercado;
-
-    @OneToOne(mappedBy = "instrumento", fetch = FetchType.LAZY)
-    private DadosFundamentais dadosFundamentais;
-
-    @OneToMany(mappedBy = "instrumento", fetch = FetchType.LAZY)
-    private List<ValorInstrumentoDiario> valoresDiarios;
-
-    @OneToMany(mappedBy = "instrumento", fetch = FetchType.LAZY)
-    private List<Posicao> posicoes;
+    @Column(name = "mercado", nullable = false, length = 20)
+    private String mercadoId;
 
     public Instrumento() {}
 
-    public Instrumento(String instrumentoId, String descricao, Mercado mercado) {
+    public Instrumento(String instrumentoId, String descricao, String mercadoId) {
         this.instrumentoId = instrumentoId;
         this.descricao = descricao;
-        this.mercado = mercado;
+        this.mercadoId = mercadoId;
     }
 
-    // Getters e Setters
     public String getInstrumentoId() { return instrumentoId; }
     public void setInstrumentoId(String instrumentoId) { this.instrumentoId = instrumentoId; }
 
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
 
-    public Mercado getMercado() { return mercado; }
-    public void setMercado(Mercado mercado) { this.mercado = mercado; }
-
-    public DadosFundamentais getDadosFundamentais() { return dadosFundamentais; }
-    public void setDadosFundamentais(DadosFundamentais dadosFundamentais) { this.dadosFundamentais = dadosFundamentais; }
-
-    public List<ValorInstrumentoDiario> getValoresDiarios() { return valoresDiarios; }
-    public void setValoresDiarios(List<ValorInstrumentoDiario> valoresDiarios) { this.valoresDiarios = valoresDiarios; }
-
-    public List<Posicao> getPosicoes() { return posicoes; }
-    public void setPosicoes(List<Posicao> posicoes) { this.posicoes = posicoes; }
+    public String getMercadoId() { return mercadoId; }
+    public void setMercadoId(String mercadoId) { this.mercadoId = mercadoId; }
 }
