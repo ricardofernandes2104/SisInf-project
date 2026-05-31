@@ -29,7 +29,7 @@ END IF;
 FOR i IN 1..8 LOOP
 		sum_value := sum_value + (CAST(SUBSTRING(nif_text, i, 1) AS INT) * (10 - i));
 END LOOP;
-	check_digit := 11 - (sum_value & 11);
+	check_digit := 11 - (sum_value % 11);
 	IF check_digit >= 10 THEN
 		check_digit := 0;
 END IF;
@@ -275,6 +275,3 @@ SELECT * FROM contacto_email WHERE cliente_nif = '501964843';
 -- region Other changes
 --TODO
 -- endregion
-
-ROLLBACK;
-SELECT * FROM instrumento;
