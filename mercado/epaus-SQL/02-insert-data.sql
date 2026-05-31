@@ -166,4 +166,3 @@ SELECT setval(
 
 COMMIT;
 
-

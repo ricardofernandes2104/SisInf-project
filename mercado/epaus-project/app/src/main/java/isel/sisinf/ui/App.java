@@ -210,9 +210,7 @@ class UI implements AutoCloseable
     {
         // TODO: Change the code and your Group ID & member names
         System.out.println("Brought to you by a wonderful set of professors!");
-        System.out.println("DAL version:"+ isel.sisinf.jpa.Dal.version());
-        System.out.println("Core version:"+ isel.sisinf.model.Core.version());
-        
+       // System.out.println("DAL version:"+ isel.sisinf.jpa.Dal.version());
     }
 }
 

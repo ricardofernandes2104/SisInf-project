@@ -276,3 +276,5 @@ SELECT * FROM contacto_email WHERE cliente_nif = '501964843';
 --TODO
 -- endregion
 
+ROLLBACK;
+SELECT * FROM instrumento;
