@@ -167,8 +167,6 @@ SELECT * FROM valor_instrumento_diario;
 -- endregion
 
 -- region Question 5
-alter view contacto_cliente rename column carta_cidadao to cartao_cidadao;
-
 CREATE OR REPLACE VIEW contacto_cliente(nif,cartao_cidadao,nome,tipo_contacto,contacto,descricao) AS
 SELECT c.nif, c.cartao_cidadao, c.nome, 'EMAIL', ce.email, ce.descricao
 FROM cliente c JOIN contacto_email ce ON ce.cliente_nif = c.nif

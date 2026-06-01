@@ -12,10 +12,16 @@ public class ContactoCliente {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cliente_nif")
+    @JoinColumn(name = "nif")
     private Cliente cliente;
 
-    @Column(name = "tipo", length = 20)
+    @Column(name = "nome")
+    private String nome;
+
+    @Column(name = "cartao_cidadao")
+    private String cartaoCidadao;
+
+    @Column(name = "tipo_contacto", length = 20)
     private String tipo;
 
     @Column(name = "descricao", length = 50)
@@ -31,6 +37,11 @@ public class ContactoCliente {
         this.tipo = tipo;
         this.descricao = descricao;
         this.contacto = contacto;
+
+        if (cliente != null) {
+            this.nome = cliente.getNome();
+            this.cartaoCidadao = cliente.getCartaoCidadao();
+        }
     }
 
     public Long getId() { return id; }

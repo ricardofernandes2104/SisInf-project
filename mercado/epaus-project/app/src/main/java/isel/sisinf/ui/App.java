@@ -163,7 +163,6 @@ class UI implements AutoCloseable
     
     */
 
-
     //Implement an AutoClosable object. 
     // If needed you can add more stuff to clean at the end
     @Override
@@ -176,34 +175,137 @@ class UI implements AutoCloseable
         }
     }
 
+    private String readString(Scanner s, String prompt) {
+        System.out.print(prompt);
+        String input = s.nextLine();
+        if (input.trim().isEmpty()) {
+            input = s.nextLine();
+        }
+        return input;
+    }
+
+    private String getRootCauseMessage(Throwable e) {
+        Throwable cause = e;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause.getMessage();
+    }
+
+    private boolean isOptimisticLockException(Throwable e) {
+        Throwable cause = e;
+        while (cause != null) {
+            if (cause instanceof jakarta.persistence.OptimisticLockException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
     private void createClient() {
-        // TODO
-        System.out.println("createClient()");
-    }
-  
-    private void createPortfolio()
-    {
-        // TODO
-        System.out.println("createPortfolio()");
+        System.out.println("--- Create New Client ---");
+        Scanner s = getScanner();
+
+        String name = readString(s, "Client Name: ");
+        String nif = readString(s, "Client NIF: ");
+        String cc = readString(s, "Client CC: ");
+
+        System.out.println("- Contact Information -");
+        String contactType = readString(s, "Type (e.g., Phone, Email): ").toUpperCase();
+        String description = readString(s, "Description (e.g., Personal, Work): ");
+        String contactValue = readString(s, "Contact Value: ");
+
+        try {
+            isel.sisinf.jpa.Dal.createClient(nif, cc, name, contactType, description, contactValue);
+            System.out.println("\n[SUCCESS] Client and contact created successfully.");
+        } catch (Exception e) {
+            System.out.println("\n[ERROR] Could not create client.");
+            System.out.println("Reason: " + getRootCauseMessage(e));
+        }
     }
 
-    private void listPositions()
-    {
-        // TODO
-        System.out.println("listPositions()");
+    private void createPortfolio() {
+        System.out.println("--- Create Portfolio ---");
+        java.util.Scanner s = getScanner();
 
+        String nif = readString(s, "Client NIF: ");
+        String portfolioName = readString(s, "Portfolio Name: ");
+
+        try {
+            isel.sisinf.jpa.Dal.createPortfolio(nif, portfolioName);
+            System.out.println("\n[SUCCESS] Portfolio created successfully.");
+        } catch (Exception e) {
+            System.out.println("\n[ERROR] Could not create portfolio.");
+            System.out.println("Reason: " + getRootCauseMessage(e));
+        }
+    }
+
+    private void listPositions() {
+        System.out.println("--- List Positions ---");
+        Scanner s = getScanner();
+        String nif = readString(s, "Client NIF: ");
+
+        try {
+            java.util.List<isel.sisinf.model.Portefolio> portefolios = isel.sisinf.jpa.Dal.listPositions(nif);
+
+            if (portefolios.isEmpty()) {
+                System.out.println("\nNo portfolio found for client with NIF " + nif);
+                return;
+            }
+
+            java.math.BigDecimal totalClientValue = java.math.BigDecimal.ZERO;
+
+            for (isel.sisinf.model.Portefolio p : portefolios) {
+                System.out.println("\nPortfolio: " + p.getNome() + " | Portfolio Total: " + p.getValorTotal() + "€");
+
+                for (isel.sisinf.model.Posicao pos : p.getPosicoes()) {
+                    System.out.println("  -> Instrument: " + pos.getInstrumento().getInstrumentoId() + " | Qty: " + pos.getQuantidade());
+                }
+
+                if (p.getValorTotal() != null) {
+                    totalClientValue = totalClientValue.add(p.getValorTotal());
+                }
+            }
+            System.out.println("\n=> Total Global Client Portfolios Value: " + totalClientValue + "€");
+
+        } catch (Exception e) {
+            System.out.println("\n[ERROR] Error listing positions.");
+            System.out.println("Reason: " + getRootCauseMessage(e));
+        }
     }
 
     private void updateInvestments() {
-        // TODO
-        System.out.println("updateInvestments()");
+        System.out.println("--- Update Investments (Daily Values) ---");
+
+        try {
+            isel.sisinf.jpa.Dal.updateDailyValues();
+            System.out.println("\n[SUCCESS] Daily values updated successfully via Stored Procedure.");
+        } catch (Exception e) {
+            System.out.println("\n[ERROR] Failed to execute procedure p_actualizaValorDiario.");
+            System.out.println("Reason: " + getRootCauseMessage(e));
+        }
     }
 
-    private void updateClient()
-    {
-        // TODO
-        System.out.println("parkScooter()");
-        
+    private void updateClient() {
+        System.out.println("--- Update Client (Optimistic Locking Test) ---");
+        Scanner s = getScanner();
+
+        String nif = readString(s, "Client NIF to update: ");
+        String newName = readString(s, "New Client Name: ");
+
+        try {
+            isel.sisinf.jpa.Dal.updateClientName(nif, newName);
+            System.out.println("\n[SUCCESS] Client name updated successfully.");
+        } catch (Exception e) {
+            if (isOptimisticLockException(e)) {
+                System.out.println("\n[CONCURRENCY ERROR - OPTIMISTIC LOCKING]");
+                System.out.println("The client record was modified by another concurrent user. Operation aborted to prevent data corruption.");
+            } else {
+                System.out.println("\n[ERROR] Failed to update client data.");
+                System.out.println("Reason: " + getRootCauseMessage(e));
+            }
+        }
     }
 
     private void about()

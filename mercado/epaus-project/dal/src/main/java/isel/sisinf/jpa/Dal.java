@@ -1,30 +1,79 @@
-/*
-MIT License
-
-Copyright (c) 2025-2026, Nuno Datia, ISEL
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
 package isel.sisinf.jpa;
 
-public class Dal
-{
-    //For Demonstration purposes only
-    public static String version(){ return "1.0";}
+import isel.sisinf.model.Cliente;
+import isel.sisinf.model.ContactoCliente;
+import isel.sisinf.model.Portefolio;
+import isel.sisinf.model.Posicao;
+import jakarta.persistence.EntityManager;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Dal {
+    private static final TransactionManager tm = new JpaTransactionManager();
+
+    public static String version() { return "1.0"; }
+
+    // 6a) Create a client and contact
+    public static void createClient(String nif, String cc, String nome, String tipo, String descricao, String contacto) {
+        tm.run(tx -> {
+            Cliente cliente = new Cliente(nif, cc, nome);
+            tx.clienteRepository().save(cliente);
+
+            EntityManager em = ((JpaTransaction) tx).getEntityManager();
+            ContactoCliente novoContacto = new ContactoCliente(cliente, tipo, descricao, contacto);
+            em.persist(novoContacto);
+        });
+    }
+
+    // 6b) Create a portfolio for a client
+    public static void createPortfolio(String nif, String portfolioName) {
+        tm.run(tx -> {
+            Cliente cliente = tx.clienteRepository().findById(nif)
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado com o NIF: " + nif));
+
+            Portefolio portefolio = new Portefolio(cliente, portfolioName, BigDecimal.ZERO);
+            tx.portefolioRepository().save(portefolio);
+        });
+    }
+
+    // 6c) List positions of a client
+    public static List<Portefolio> listPositions(String nif) {
+        final List<Portefolio> result = new ArrayList<>();
+        tm.run(tx -> {
+            List<Portefolio> portefolios = tx.portefolioRepository().findByCliente(nif);
+            for (Portefolio p : portefolios) {
+                // Força a hidratação das coleções Lazy antes de fechar o EntityManager
+                p.getPosicoes().size();
+                for (Posicao pos : p.getPosicoes()) {
+                    pos.getInstrumento().getDescricao();
+                }
+                result.add(p);
+            }
+        });
+        return result;
+    }
+
+    // 6d) Update daily value of an instrument using the stored procedure
+    public static void updateDailyValues() {
+        tm.run(tx -> {
+            EntityManager em = ((JpaTransaction) tx).getEntityManager();
+            em.createNativeQuery("CALL p_actualizaValorDiario()").executeUpdate();
+        });
+    }
+
+    // 6e) Update client data
+    public static void updateClientName(String nif, String newName) {
+        tm.run(tx -> {
+            Cliente cliente = tx.clienteRepository().findById(nif)
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado com o NIF: " + nif));
+
+            cliente.setNome(newName);
+            tx.clienteRepository().save(cliente);
+        });
+    }
+
+    public static void close() {
+        JpaTransaction.shutdown();
+    }
 }

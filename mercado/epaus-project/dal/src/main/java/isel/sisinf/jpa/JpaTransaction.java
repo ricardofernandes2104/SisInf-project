@@ -36,4 +36,8 @@ public final class JpaTransaction implements Transaction {
 
     @Override public void close() { em.close(); }
     public static void shutdown() { EMF.close(); }
+
+    public EntityManager getEntityManager() {
+        return em;
+    }
 }
