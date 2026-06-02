@@ -213,6 +213,11 @@ class UI implements AutoCloseable
 
         System.out.println("- Contact Information -");
         String contactType = readString(s, "Type (e.g., Phone, Email): ").toUpperCase();
+
+        if (contactType.equals("PHONE")) {
+            contactType = "TELEFONE";
+        }
+
         String description = readString(s, "Description (e.g., Personal, Work): ");
         String contactValue = readString(s, "Contact Value: ");
 
