@@ -316,7 +316,7 @@ class UI implements AutoCloseable
     private void about()
     {
         // TODO: Change the code and your Group ID & member names
-        System.out.println("Brought to you by a wonderful set of professors!");
+        System.out.println("Brought to you by Group 24 composed by Guilherme Lamego, Ricardo Fernandes and Tiago Silva and a wonderful set of professors!");
        // System.out.println("DAL version:"+ isel.sisinf.jpa.Dal.version());
     }
 }
